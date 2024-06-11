@@ -38,13 +38,14 @@ const Home = () => {
 
         if (authData && authData.token) {
             try {
-                await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/pdfs/upload`, formData, {
+                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/pdfs/upload`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${authData.token}`
                     }
                 });
-                navigate('/');
+                // Redirect to PDFViewer with the id of the uploaded PDF
+                navigate(`/pdf/${response.data._id}`);
             } catch (error) {
                 console.error('Failed to upload PDF', error);
             }
@@ -69,6 +70,7 @@ const Home = () => {
             <ul>
                 {pdfs.map(pdf => (
                     <li key={pdf._id}>
+                        {/* Pass the id to the PDFViewer component */}
                         <a href={`/pdf/${pdf._id}`} target="_blank" rel="noopener noreferrer">{pdf.originalname}</a>
                     </li>
                 ))}

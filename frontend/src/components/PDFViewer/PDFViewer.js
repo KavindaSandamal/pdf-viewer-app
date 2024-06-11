@@ -1,35 +1,67 @@
 import React, { useEffect, useState } from 'react';
-import { Document, Page } from 'react-pdf';
-import axios from 'axios';
+import axios from './axiosConfig';
+import { Document, Page, pdfjs } from 'react-pdf';
+import { useParams } from 'react-router-dom';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
-const PDFViewer = ({ match }) => {
-    const [pdf, setPdf] = useState(null);
+// Set the workerSrc globally for PDF.js
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-    useEffect(() => {
-        const fetchPdf = async () => {
-            try {
-                const { data } = await axios.get(`/api/pdfs/${match.params.id}`, {
-                    responseType: 'blob'
-                });
-                const file = new Blob([data], { type: 'application/pdf' });
-                const fileURL = URL.createObjectURL(file);
-                setPdf(fileURL);
-            } catch (error) {
-                console.error('Failed to fetch PDF', error);
-            }
-        };
-        fetchPdf();
-    }, [match.params.id]);
+const PDFViewer = () => {
+  const { id } = useParams();
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [error, setError] = useState(null);
 
-    return (
-        <div>
-            {pdf && (
-                <Document file={pdf}>
-                    <Page pageNumber={1} />
-                </Document>
-            )}
-        </div>
-    );
+  useEffect(() => {
+    const fetchPdf = async () => {
+      try {
+        const { data } = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/pdfs/${id}`, {
+          responseType: 'blob',
+        });
+        const blobUrl = URL.createObjectURL(data);
+        setPdfUrl(blobUrl);
+      } catch (error) {
+        console.error('Failed to fetch PDF', error);
+        setError('Failed to fetch PDF');
+      }
+    };
+
+    fetchPdf();
+
+    // Cleanup blob URL on unmount
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [id]);
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+  };
+
+  return (
+    <div>
+      {error && <div>Error: {error}</div>}
+      {pdfUrl && (
+        <Document
+          file={pdfUrl}
+          onLoadSuccess={onDocumentLoadSuccess}
+        >
+          {Array.from(
+            new Array(numPages),
+            (el, index) => (
+              <Page
+                key={`page_${index + 1}`}
+                pageNumber={index + 1}
+              />
+            ),
+          )}
+        </Document>
+      )}
+    </div>
+  );
 };
 
 export default PDFViewer;

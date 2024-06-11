@@ -1,6 +1,8 @@
 import React from 'react';
-import PDFViewerComponent from '../components/PDFViewer/PDFViewer';
+import PDFViewer from '../components/PDFViewer/PDFViewer';
 
-const PDFViewer = ({ match }) => <PDFViewerComponent match={match} />;
+const PDFViewerContainer = ({ match }) => {
+    return <PDFViewer match={match} />;
+};
 
-export default PDFViewer;
+export default PDFViewerContainer;

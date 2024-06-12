@@ -3,8 +3,10 @@ import axios from './axiosConfig';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { useParams } from 'react-router-dom';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import '../../App.css';
-
+import '../../index.css';
+import { Icon } from "@iconify/react";
+import { isMobile } from "react-device-detect";
+import { MdFitScreen } from "react-icons/md";
 
 // Set the workerSrc globally for PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -13,7 +15,12 @@ const PDFViewer = () => {
   const { id } = useParams();
   const [pdfUrl, setPdfUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
+  const [pdfZoom, setPdfZoom] = useState(1);
   const [error, setError] = useState(null);
+  const [fitToPage, setFitToPage] = useState(false); // New state for fitting PDF to page
+
+  const PDF_INITIAL_SCALE = isMobile ? 0.6 : 1;
+  const PDF_MAX_ZOOM = PDF_INITIAL_SCALE + 1;
 
   useEffect(() => {
     const fetchPdf = async () => {
@@ -43,21 +50,60 @@ const PDFViewer = () => {
     setNumPages(numPages);
   };
 
+  const handleZoomChange = (offset) => {
+    setPdfZoom(prevZoom => prevZoom + offset);
+  };
+
+  const handleFitToPage = () => {
+    setFitToPage(!fitToPage);
+  };
+
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="max-w-screen-md w-full text-center bg-white p-8 rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-y-auto h-96 bg-red-200"> {/* Change background color here */}
-          {error && <div className="text-red-500">Error: {error}</div>}
-          {pdfUrl && (
-            <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
-              {Array.from(
-                new Array(numPages),
-                (el, index) => (
-                  <Page key={`page_${index + 1}`} pageNumber={index + 1} />
-                )
-              )}
-            </Document>
-          )}
+    <div className="flex flex-col items-center w-full h-screen bg-stone-400 p-3">
+      <div className="bg-gray-200  overflow-auto w-fit">
+        {error && <div className="text-red-500">Error: {error}</div>}
+        {pdfUrl && (
+          <Document
+            file={pdfUrl}
+            onLoadSuccess={onDocumentLoadSuccess}
+            options={{ scrollMode: 'vertical' }}
+          >
+            {Array.from(
+              new Array(numPages),
+              (el, index) => (
+                <div key={`page_${index + 1}`} className="mb-8 bg-gray-200">
+                  <Page pageNumber={index + 1} scale={fitToPage ? 'auto' : pdfZoom * 1.5} />
+                </div>
+              )
+            )}
+          </Document>
+        )}
+      </div>
+      <div className="fixed left-0 right-0 bottom-3 bg-stone-700 w-fit m-auto p-2 rounded-lg opacity-[0.9]">
+        <div className="flex items-center">
+          <button
+            type="button"
+            className={`text-white text-[2rem] px-3 ${pdfZoom <= PDF_INITIAL_SCALE ? 'text-[silver]' : 'text-white'}`}
+            onClick={() => handleZoomChange(-0.2)}
+          >
+            <Icon icon="material-symbols:zoom-out" />
+          </button>
+
+          <button
+            type="button"
+            className={`text-[2rem] px-3 ${pdfZoom >= PDF_MAX_ZOOM ? 'text-[silver]' : 'text-white'}`}
+            onClick={() => handleZoomChange(0.2)}
+          >
+            <Icon icon="material-symbols:zoom-in" />
+          </button>
+
+          <button
+            type="button"
+            className="text-[2rem] px-3 text-white"
+            onClick={handleFitToPage}
+          >
+            <MdFitScreen /> 
+          </button>
         </div>
       </div>
     </div>

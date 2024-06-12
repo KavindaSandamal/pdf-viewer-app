@@ -98,16 +98,18 @@ const Home = () => {
                     </label>
                     <button type="submit" className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">View</button>
                 </form>
-                <div className="mt-8 max-w-4xl mx-auto">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-4">Recently Viewed PDFs</h2>
-                    <ul className="bg-white shadow-md rounded-lg p-4">
-                        {pdfs.map(pdf => (
-                            <li key={pdf._id} className="border-b border-gray-200 last:border-0 py-2">
-                                <a href={`/pdf/${pdf._id}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{pdf.originalname}</a>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                {pdfs.length > 0 && (
+                    <div className="mt-8 max-w-4xl mx-auto">
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Recently Viewed PDFs</h2>
+                        <ul className="bg-white shadow-md rounded-lg p-4">
+                            {pdfs.map(pdf => (
+                                <li key={pdf._id} className="border-b border-gray-200 last:border-0 py-2">
+                                    <a href={`/pdf/${pdf._id}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{pdf.originalname}</a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
         </div>
     );

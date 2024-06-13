@@ -31,3 +31,10 @@ This is a simple MERN stack application that allows users to upload PDF files an
    ```bash
    cd backend
    node server.js
+
+### Frontend
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   npm start

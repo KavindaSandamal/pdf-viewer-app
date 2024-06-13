@@ -37,4 +37,5 @@ This is a simple MERN stack application that allows users to upload PDF files an
 1. Navigate to the frontend directory:
    ```bash
    cd frontend
+   npm install
    npm start

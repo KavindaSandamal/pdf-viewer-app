@@ -8,7 +8,6 @@ import { Icon } from "@iconify/react";
 import { isMobile } from "react-device-detect";
 import { MdFitScreen } from "react-icons/md";
 
-// Set the workerSrc globally for PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const PDFViewer = () => {
@@ -76,12 +75,12 @@ const PDFViewer = () => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
     setInputPageNumber(page.toString());
-    isScrollingRef.current = true; // Disable scroll event handling during manual navigation
+    isScrollingRef.current = true; 
     const pageElement = document.getElementById(`page_${page}`);
     if (pageElement) {
       pageElement.scrollIntoView({ behavior: 'smooth' });
       setTimeout(() => {
-        isScrollingRef.current = false; // Re-enable scroll event handling after a short delay
+        isScrollingRef.current = false; 
       }, 300);
     }
   };
@@ -197,14 +196,6 @@ const PDFViewer = () => {
             onClick={() => handleZoomChange(0.2)}
           >
             <Icon icon="material-symbols:zoom-in" />
-          </button>
-
-          <button
-            type="button"
-            className="text-[2rem] px-3 text-white focus:outline-none"
-            onClick={handleFitToPage}
-          >
-            <MdFitScreen />
           </button>
         </div>
       </div>

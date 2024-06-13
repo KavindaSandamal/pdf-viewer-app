@@ -1,9 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-
-import Header from "./Header.jsx";
-import HeaderBanner from "./HeaderBanner.jsx";
-import Footer from "./Footer.jsx";
+import HeaderBanner from "./HeaderBanner.js";
+import Footer from "./Footer.js";
 
 const Components = () => {
     return (

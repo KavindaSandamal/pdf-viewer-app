@@ -12,9 +12,9 @@ dotenv.config();
 
 connectDB();
 
-const app = express();  // Initialize app here
+const app = express();  
 
-app.use(cors());  // Now you can use app
+app.use(cors());  
 app.use(express.json());
 app.use(morgan('combined'));
 

@@ -20,13 +20,23 @@ const upload = multer({
             cb(new Error('Only PDFs are allowed'));
         }
     },
-    limits: { fileSize: 1024 * 1024 * 5 }
+    limits: { fileSize: 25 * 1024 * 1024 } 
 }).single('pdf');
 
 exports.uploadPdf = (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
-            return res.status(400).json({ message: err.message });
+            if (err instanceof multer.MulterError) {
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    return res.status(400).json({ error: 'File size exceeds the limit of 25MB' });
+                } else {
+                    return res.status(400).json({ error: err.message });
+                }
+            } else if (err.message === 'Only PDFs are allowed') {
+                return res.status(400).json({ error: 'Only PDF files are allowed' });
+            } else {
+                return res.status(500).json({ error: 'An error occurred while uploading the file' });
+            }
         }
 
         const { filename, originalname, path: filePath } = req.file;
@@ -36,17 +46,18 @@ exports.uploadPdf = (req, res) => {
             const pdf = await Pdf.create({ filename, originalname, path: filePath, user: id });
             res.status(201).json(pdf);
         } catch (error) {
-            res.status(500).json({ message: 'PDF upload failed', error });
+            res.status(500).json({ error: 'PDF upload failed', error });
         }
     });
 };
+
 
 exports.getPdfs = async (req, res) => {
     try {
         const pdfs = await Pdf.find({ user: req.user.id });
         res.json(pdfs);
     } catch (error) {
-        res.status(500).json({ message: 'Failed to fetch PDFs', error });
+        res.status(500).json({ error: 'Failed to fetch PDFs', error });
     }
 };
 
@@ -54,10 +65,10 @@ exports.viewPdf = async (req, res) => {
     try {
         const pdf = await Pdf.findById(req.params.id);
         if (!pdf) {
-            return res.status(404).json({ message: 'PDF not found' });
+            return res.status(404).json({ error: 'PDF not found' });
         }
         res.sendFile(path.resolve(pdf.path));
     } catch (error) {
-        res.status(500).json({ message: 'Failed to view PDF', error });
+        res.status(500).json({ error: 'Failed to view PDF', error });
     }
 };

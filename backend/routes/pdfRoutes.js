@@ -1,6 +1,6 @@
 const express = require('express');
 const { uploadPdf, getPdfs, viewPdf } = require('../controllers/pdfController');
-const { protect } = require('../middlewares/authMiddleware');
+const { protect } = require('../middlewares/authMiddlewares');
 const router = express.Router();
 
 router.post('/upload', protect, uploadPdf);

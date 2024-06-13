@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import axios from './axiosConfig';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { useParams } from 'react-router-dom';
@@ -19,6 +19,9 @@ const PDFViewer = () => {
   const [pdfZoom, setPdfZoom] = useState(1);
   const [error, setError] = useState(null);
   const [fitToPage, setFitToPage] = useState(false);
+  const [inputPageNumber, setInputPageNumber] = useState('1');
+  const viewerRef = useRef(null);
+  const isScrollingRef = useRef(false);
 
   const PDF_INITIAL_SCALE = isMobile ? 0.6 : 1;
   const PDF_MAX_ZOOM = PDF_INITIAL_SCALE + 1;
@@ -60,34 +63,85 @@ const PDFViewer = () => {
 
   const goToNextPage = () => {
     if (currentPage < numPages) {
-      setCurrentPage(prevPage => prevPage + 1);
+      handlePageChange(currentPage + 1);
     }
   };
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(prevPage => prevPage - 1);
+      handlePageChange(currentPage - 1);
     }
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+    setInputPageNumber(page.toString());
+    isScrollingRef.current = true; // Disable scroll event handling during manual navigation
     const pageElement = document.getElementById(`page_${page}`);
     if (pageElement) {
       pageElement.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        isScrollingRef.current = false; // Re-enable scroll event handling after a short delay
+      }, 300);
     }
   };
 
-  useEffect(() => {
-    const pageElement = document.getElementById(`page_${currentPage}`);
-    if (pageElement) {
-      pageElement.scrollIntoView({ behavior: 'smooth' });
+  const handlePageInputChange = (event) => {
+    setInputPageNumber(event.target.value);
+  };
+
+  const handlePageInputSubmit = () => {
+    const pageNumber = parseInt(inputPageNumber, 10);
+    if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= numPages) {
+      handlePageChange(pageNumber);
     }
-  }, [currentPage]);
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handlePageInputSubmit();
+    }
+  };
+
+  const debounce = (func, wait) => {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  };
+
+  const handleScroll = useCallback(debounce(() => {
+    if (isScrollingRef.current) return;
+    if (viewerRef.current) {
+      const { scrollTop, offsetHeight } = viewerRef.current;
+      const pageElements = viewerRef.current.querySelectorAll('.page-container');
+      pageElements.forEach((pageElement, index) => {
+        const { offsetTop, offsetHeight: pageHeight } = pageElement;
+        if (scrollTop >= offsetTop - pageHeight / 2 && scrollTop < offsetTop + pageHeight / 2) {
+          setCurrentPage(index + 1);
+          setInputPageNumber((index + 1).toString());
+        }
+      });
+    }
+  }, 200), [numPages]);
+
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (viewer) {
+      viewer.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (viewer) {
+        viewer.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [handleScroll]);
 
   return (
     <div className="flex flex-col items-center w-full h-screen bg-stone-400 p-3">
-      <div className="bg-stone-400 overflow-auto w-fit h-full">
+      <div className="bg-stone-400 overflow-auto w-fit h-full" ref={viewerRef}>
         {error && <div className="text-red-500">Error: {error}</div>}
         {pdfUrl && (
           <Document
@@ -112,11 +166,14 @@ const PDFViewer = () => {
             <span className="text-md text-white">Back</span>
           </button>
 
-          <div>
-            <p className="mx-4 text-md bg-white px-3 py-2 rounded-lg border-slate-400 border-2 h-fit">
-              {currentPage}
-            </p>
-          </div>
+          <input
+            type="text"
+            className="mx-4 text-md bg-white px-3 py-2 rounded-lg border-slate-400 border-2 h-fit"
+            value={inputPageNumber}
+            onChange={handlePageInputChange}
+            onKeyPress={handleKeyPress}
+            style={{ width: '50px', textAlign: 'center' }}
+          />
 
           <button
             disabled={currentPage === numPages}

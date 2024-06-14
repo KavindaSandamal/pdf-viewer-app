@@ -78,7 +78,13 @@ const Home = () => {
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
-        setFile(selectedFile);
+        if (selectedFile.size > 25 * 1024 * 1024) {
+            setErrorMessage('File size exceeds the limit (25MB)');
+            setFile(null);
+        } else {
+            setFile(selectedFile);
+            setErrorMessage(null);
+        }
     };
 
     const handleDragOver = (e) => {
@@ -88,7 +94,13 @@ const Home = () => {
     const handleDrop = (e) => {
         e.preventDefault();
         const droppedFile = e.dataTransfer.files[0];
-        setFile(droppedFile);
+        if (droppedFile.size > 25 * 1024 * 1024) {
+            setErrorMessage('File size exceeds the limit (25MB)');
+            setFile(null);
+        } else {
+            setFile(droppedFile);
+            setErrorMessage(null);
+        }
     };
 
     const handleUpload = async (e) => {
@@ -103,11 +115,6 @@ const Home = () => {
         formData.append('pdf', file);
     
         if (authData && authData.token) {
-            if (file.size > 25 * 1024 * 1024) { 
-                setErrorMessage('File size exceeds the limit (25MB)');
-                return; 
-            }
-    
             try {
                 const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/pdfs/upload`, formData, {
                     headers: {
@@ -182,6 +189,7 @@ const Home = () => {
                         )}
                         <input type="file" id="fileInput" onChange={handleFileChange} className="hidden" />
                     </label>
+                    <p className="text-gray-600 mb-4">Maximum file size: 25MB</p>
                     <button type="submit" className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">View</button>
                 </form>
                 {pdfs.length > 0 && (

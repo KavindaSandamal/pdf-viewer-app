@@ -1,0 +1,16 @@
+version: '3'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb+srv://kavindasandamal:1234@cluster0.3a2hmte.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"

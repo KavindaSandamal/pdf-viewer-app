@@ -32,7 +32,7 @@ const HeaderBanner2 = () => {
                     <Header />
                     <div className="flex flex-col items-center justify-center h-screen ">
                     <div className="text-center text-white">
-                        <h1 className="text-9xl font-bold mb-8">PDF Viewer </h1>
+                        <h1 className="text-9xl font-bold mb-8">PDF </h1>
                         <h4 className="text-2xl font-light mb-6 font-sans">
                             View Your PDF With Free<br /> Join With US To Feel New Features
                         </h4>

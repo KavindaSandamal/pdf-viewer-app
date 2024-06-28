@@ -157,7 +157,7 @@ const Home = () => {
 
             <div className="container mx-auto py-12 px-4 lg:px-8">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-gray-800">Welcome to PDF Viewer</h1>
+                    <h1 className="text-4xl font-bold text-gray-800">Welcome </h1>
                     <p className="text-gray-600 mt-2">Upload and manage your PDF files easily</p>
                 </div>
                 <form onSubmit={handleUpload} className="bg-white shadow-md rounded-lg p-8 max-w-4xl mx-auto">
